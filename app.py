@@ -73,7 +73,7 @@ with col_map:
         location=[st.session_state.bot_live_lat, st.session_state.bot_live_lng],
         popup=f"<b>ROBOT CURRENT POSITION</b><br>Battery: {st.session_state.bot_battery}%",
         icon=folium.Icon(color="purple", icon="play", prefix="fa")
-    ).addTo(m)
+    ).add_to(m)
 
     # 2. Place planned target path stops onto the map layout
     for idx, stop in enumerate(st.session_state.delivery_stops):
