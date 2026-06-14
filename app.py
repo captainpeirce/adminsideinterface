@@ -81,7 +81,7 @@ with col_map:
             location=stop,
             popup=f"Delivery Drop Stop #{idx+1}",
             icon=folium.Icon(color="green" if idx==2 else "blue" if idx==1 else "red", icon="flag")
-        ).addTo(m)
+        ).add_to(m)
 
     # Render interactive listener map canvas
     map_data = st_folium(m, height=520, width="100%", key="main_campus_map")
