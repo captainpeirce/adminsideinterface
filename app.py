@@ -11,13 +11,14 @@ st.set_page_config(
     layout="wide"
 )
 
-# 1. INITIALISE SESSION MEMORY STATES
+# 1. LOCKED-IN VEHICLE TESTING COORDINATES
+# Updated from general starting pool to your exact requested coordinates: 17.570514, 78.432775
 if "delivery_stops" not in st.session_state:
     st.session_state.delivery_stops = []
 if "bot_live_lat" not in st.session_state:
-    st.session_state.bot_live_lat = 17.5450  # Centered right near Hyderabad park
+    st.session_state.bot_live_lat = 17.570514  # <--- Locked to your exact testing latitude
 if "bot_live_lng" not in st.session_state:
-    st.session_state.bot_live_lng = 78.3910
+    st.session_state.bot_live_lng = 78.432775  # <--- Locked to your exact testing longitude
 if "bot_status" not in st.session_state:
     st.session_state.bot_status = "🔴 Offline / Idle"
 if "bot_battery" not in st.session_state:
@@ -53,9 +54,9 @@ if not st.session_state.delivery_stops:
     st.sidebar.info("No stops selected. Click on the map to add locations.")
 else:
     for idx, stop in enumerate(st.session_state.delivery_stops):
-        st.sidebar.success(f"**Stop #{idx+1}**  \nLat: {stop[0]:.6f}  \nLng: {stop[1]:.6f}")
+        st.sidebar.success(f"**Stop #{idx+1}**  \nLat: {stop:.6f}  \nLng: {stop:.6f}")
 
-if st.sidebar.button("导 Clear Route Queue", use_container_width=True):
+if st.sidebar.button("🧹 Clear Route Queue", use_container_width=True):
     st.session_state.delivery_stops = []
     st.toast("🧹 Route queue cleared!", icon="🗑️")
     time.sleep(0.5)
@@ -63,7 +64,7 @@ if st.sidebar.button("导 Clear Route Queue", use_container_width=True):
 
 
 # --- SECTION 2: MAP PLATFORM ---
-col_map, col_controls = st.columns([2, 1])
+col_map, col_controls = st.columns()
 
 with col_map:
     st.subheader("🗺️ Precinct Navigation System")
@@ -71,7 +72,7 @@ with col_map:
     # Render map base focused on the active robot pin
     m = folium.Map(
         location=[st.session_state.bot_live_lat, st.session_state.bot_live_lng], 
-        zoom_start=17, 
+        zoom_start=18,  # Slightly zoomed in closer for sidewalk view precision
         max_zoom=21
     )
 
@@ -133,17 +134,16 @@ with col_controls:
     
     if st.button("⚡ Launch Route Path", disabled=disable_dispatch, use_container_width=True):
         stops = st.session_state.delivery_stops
-        lat1 = stops[0][0] if len(stops) > 0 else 0.0
-        ln1  = stops[0][1] if len(stops) > 0 else 0.0
-        lat2 = stops[1][0] if len(stops) > 1 else 0.0
-        ln2  = stops[1][1] if len(stops) > 1 else 0.0
-        lat3 = stops[2][0] if len(stops) > 2 else 0.0
-        ln3  = stops[2][1] if len(stops) > 2 else 0.0
+        lat1 = stops if len(stops) > 0 else 0.0
+        ln1  = stops if len(stops) > 0 else 0.0
+        lat2 = stops if len(stops) > 1 else 0.0
+        ln2  = stops if len(stops) > 1 else 0.0
+        lat3 = stops if len(stops) > 2 else 0.0
+        ln3  = stops if len(stops) > 2 else 0.0
 
         dispatch_url = f"http://{bot_ip}/dispatch?lat1={lat1:.6f}&ln1={ln1:.6f}&lat2={lat2:.6f}&ln2={ln2:.6f}&lat3={lat3:.6f}&ln3={ln3:.6f}"
         
         if demo_mode:
-            # Create a clean loading animation for presentations
             with st.spinner("Encrypting path layout data strings..."):
                 time.sleep(1.2)
             st.toast("🎉 Dispatch successful! Bot-01 leaving loading terminal.", icon="🚀")
@@ -172,13 +172,13 @@ st.write("Use this test tool to mock incoming data from your robot's cellular mo
 
 c1, c2, c3, c4 = st.columns(4)
 with c1:
-    test_lat = st.number_input("Simulate Latitude", value=17.545200, format="%.6f")
+    test_lat = st.number_input("Simulate Latitude", value=17.570514, format="%.6f") # Default matched to your testing zone
 with c2:
-    test_lng = st.number_input("Simulate Longitude", value=78.391200, format="%.6f")
+    test_lng = st.number_input("Simulate Longitude", value=78.432775, format="%.6f") # Default matched to your testing zone
 with c3:
     test_stat = st.selectbox("Simulate Mode Status", ["🔴 Offline / Idle", "🟢 Navigating Stop 1", "🟡 Waiting at Stop 1", "🟢 Returning Home", "⚠️ Hazard Stuck"])
 with c4:
-    test_batt = st.slider("Simulate Battery %", 0, 100, 85)
+    test_batt = st.slider("Simulate Battery %", 0, 100, 100)
 
 if st.button("📥 Apply Simulated Updates", use_container_width=True):
     st.session_state.bot_live_lat = test_lat
