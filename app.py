@@ -135,12 +135,13 @@ with col_controls:
     
     if st.button("⚡ Launch Route Path", disabled=disable_dispatch, use_container_width=True):
         stops = st.session_state.delivery_stops
-        lat1 = stops if len(stops) > 0 else 0.0
-        ln1  = stops if len(stops) > 0 else 0.0
-        lat2 = stops if len(stops) > 1 else 0.0
-        ln2  = stops if len(stops) > 1 else 0.0
-        lat3 = stops if len(stops) > 2 else 0.0
-        ln3  = stops if len(stops) > 2 else 0.0
+        lat1 = stops[0][0] if len(stops) > 0 else 0.0
+        ln1  = stops[0][1] if len(stops) > 0 else 0.0
+        lat2 = stops[1][0] if len(stops) > 1 else 0.0
+        ln2  = stops[1][1] if len(stops) > 1 else 0.0
+        lat3 = stops[2][0] if len(stops) > 2 else 0.0
+        ln3  = stops[2][1] if len(stops) > 2 else 0.0
+
 
         dispatch_url = f"http://{bot_ip}/dispatch?lat1={lat1:.6f}&ln1={ln1:.6f}&lat2={lat2:.6f}&ln2={ln2:.6f}&lat3={lat3:.6f}&ln3={ln3:.6f}"
         
