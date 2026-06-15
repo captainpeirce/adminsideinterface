@@ -64,7 +64,7 @@ if st.sidebar.button("🧹 Clear Route Queue", use_container_width=True):
 
 
 # --- SECTION 2: MAP PLATFORM ---
-col_map, col_controls = st.columns()    
+col_map, col_controls = st.columns(2)    
 
 with col_map:
     st.subheader("🗺️ Precinct Navigation System")
