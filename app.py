@@ -11,27 +11,30 @@ st.set_page_config(
     layout="wide"
 )
 
-# 1. LOCKED-IN VEHICLE TESTING COORDINATES
-# Updated from general starting pool to your exact requested coordinates: 17.570514, 78.432775
+# 1. INITIALISE SESSION MEMORY STATES
 if "delivery_stops" not in st.session_state:
     st.session_state.delivery_stops = []
 if "bot_live_lat" not in st.session_state:
-    st.session_state.bot_live_lat = 17.570514  # <--- Locked to your exact testing latitude
+    st.session_state.bot_live_lat = 17.570514  # Dundigal coordinates
 if "bot_live_lng" not in st.session_state:
-    st.session_state.bot_live_lng = 78.432775  # <--- Locked to your exact testing longitude
+    st.session_state.bot_live_lng = 78.432775
 if "bot_status" not in st.session_state:
     st.session_state.bot_status = "🔴 Offline / Idle"
 if "bot_battery" not in st.session_state:
     st.session_state.bot_battery = "100"
+if "current_stop_index" not in st.session_state:
+    st.session_state.current_stop_index = 0
+if "route_in_progress" not in st.session_state:
+    st.session_state.route_in_progress = False
 
 # --- TOP HEADER SECTION ---
 st.title("🛰️ Precinct Delivery Bot - Advanced Control Center")
-st.write("Manage route dispatching, monitor vehicle health, and issue emergency controls live.")
+st.write("Manage route dispatching, monitor vehicle health, and track waypoint completion paths live.")
 
 # --- SIDEBAR CONFIGURATION ---
 st.sidebar.header("⚙️ System Control Panel")
 
-# Demo Mode Toggle Switch (Critical for presentations!)
+# Demo Mode Toggle Switch (Critical for error-free pitches!)
 demo_mode = st.sidebar.toggle("🧪 Enable Demo Mode", value=True, help="Turn on to safely simulate dispatches without hardware connected.")
 
 st.sidebar.markdown("---")
@@ -56,16 +59,18 @@ else:
     for idx, stop in enumerate(st.session_state.delivery_stops):
         st.sidebar.success(f"**Stop #{idx+1}**  \nLat: {stop[0]:.6f}  \nLng: {stop[1]:.6f}")
 
-
-if st.sidebar.button("🧹 Clear Route Queue", use_container_width=True):
+if st.sidebar.button("导 Clear Route Queue", use_container_width=True):
     st.session_state.delivery_stops = []
-    st.toast("🧹 Route queue cleared!", icon="🗑️")
+    st.session_state.current_stop_index = 0
+    st.session_state.route_in_progress = False
+    st.session_state.bot_status = "🔴 Offline / Idle"
+    st.toast("🧹 Route workspace cleared!", icon="🗑️")
     time.sleep(0.5)
     st.rerun()
 
 
-# --- SECTION 2: MAP PLATFORM ---
-col_map, col_controls = st.columns(2)    
+# --- SECTION 2: SIDE-BY-SIDE PLATFORM LAYOUT ---
+col_map, col_controls = st.columns(2)
 
 with col_map:
     st.subheader("🗺️ Precinct Navigation System")
@@ -73,32 +78,57 @@ with col_map:
     # Render map base focused on the active robot pin
     m = folium.Map(
         location=[st.session_state.bot_live_lat, st.session_state.bot_live_lng], 
-        zoom_start=18,  # Slightly zoomed in closer for sidewalk view precision
+        zoom_start=18, 
         max_zoom=21
     )
 
-    # 1. Place the LIVE ROBOT TRACKING PIN
+    # DYNAMIC PATH TRACING LINE
+    if st.session_state.delivery_stops:
+        path_coordinates = [[st.session_state.bot_live_lat, st.session_state.bot_live_lng]]
+        for stop in st.session_state.delivery_stops:
+            path_coordinates.append([stop[0], stop[1]])
+        
+        folium.PolyLine(
+            locations=path_coordinates,
+            color="#2563eb",
+            weight=4,
+            opacity=0.7,
+            dash_array="8, 8",
+            tooltip="Calculated Autonomous Mission Path"
+        ).add_to(m)
+
+    # PLACE THE LIVE ROBOT PURPLE POSITION PIN
     folium.Marker(
         location=[st.session_state.bot_live_lat, st.session_state.bot_live_lng],
         popup=f"<b>VEHICLE ID: BOT-01</b><br>Status: {st.session_state.bot_status}<br>Battery: {st.session_state.bot_battery}%",
         icon=folium.Icon(color="purple", icon="play", prefix="fa")
     ).add_to(m)
 
-    # 2. Place planned target route destinations
+    # PLACE PLANNED TARGET ROUTE DESTINATION FLAGS
     for idx, stop in enumerate(st.session_state.delivery_stops):
+        if st.session_state.route_in_progress and idx < st.session_state.current_stop_index:
+            flag_color = "gray"  # Completed stop
+            popup_text = f"Stop #{idx+1} (✓ Delivered)"
+        elif st.session_state.route_in_progress and idx == st.session_state.current_stop_index:
+            flag_color = "orange"  # Active target stop
+            popup_text = f"Stop #{idx+1} (⚡ Active Target)"
+        else:
+            flag_color = "green" if idx==2 else "blue" if idx==1 else "red"
+            popup_text = f"Delivery Drop Stop #{idx+1}"
+
         folium.Marker(
-            location=stop,
-            popup=f"Delivery Drop Stop #{idx+1}",
-            icon=folium.Icon(color="green" if idx==2 else "blue" if idx==1 else "red", icon="flag")
+            location=[stop[0], stop[1]],
+            popup=popup_text,
+            icon=folium.Icon(color=flag_color, icon="flag")
         ).add_to(m)
 
-    # Render layout listener map canvas
+    # Render interactive map canvas
     map_data = st_folium(m, height=480, width="100%", key="main_precinct_map")
 
-    # Capture click inputs to build target queue
+    # Capture click inputs
     if map_data and map_data.get("last_clicked"):
         clicked_coords = (map_data["last_clicked"]["lat"], map_data["last_clicked"]["lng"])
-        if clicked_coords not in st.session_state.delivery_stops:
+        if clicked_coords not in st.session_state.delivery_stops and not st.session_state.route_in_progress:
             if len(st.session_state.delivery_stops) < 3:
                 st.session_state.delivery_stops.append(clicked_coords)
                 st.toast(f"📍 Stop #{len(st.session_state.delivery_stops)} pinned to route plan!", icon="📌")
@@ -116,6 +146,7 @@ with col_controls:
     st.markdown("### ⚠️ Safety Cutoff")
     if st.button("🛑 EMERGENCY KILL SWITCH", type="primary", use_container_width=True):
         st.toast("🚨 EMERGENCY HALT BROADCASTED!", icon="🛑")
+        st.session_state.route_in_progress = False
         if demo_mode:
             st.error("⚠️ DEMO ACTION: Vehicle execution frozen. All drive channels cut to 0%.")
             st.session_state.bot_status = "🛑 EMERGENCY HALT"
@@ -129,9 +160,50 @@ with col_controls:
 
     st.markdown("---")
     
-    # STANDARD DISPATCH LOGIC SWITCH
+    # LIVE WAYPOINT PROGRESS SYSTEM DOCK
+    st.markdown("### 📈 Live Route Progress Tracker")
+    if st.session_state.route_in_progress and st.session_state.delivery_stops:
+        total_stops = len(st.session_state.delivery_stops)
+        curr_index = st.session_state.current_stop_index
+        
+        progress_percentage = float(curr_index) / float(total_stops)
+        st.progress(progress_percentage, text=f"Route Progression: Completed {curr_index} of {total_stops} Waypoints")
+        
+        if demo_mode:
+            if curr_index < total_stops:
+                st.write(f"👉 **Current Target**: Vehicle traveling toward **Stop #{curr_index + 1}**")
+                if st.button("🙋‍♂️ Simulate Customer Pickup (Advance Bot)", use_container_width=True):
+                    active_target = st.session_state.delivery_stops[curr_index]
+                    st.session_state.bot_live_lat = active_target[0]
+                    st.session_state.bot_live_lng = active_target[1]
+                    
+                    st.session_state.current_stop_index += 1
+                    if st.session_state.current_stop_index >= total_stops:
+                        st.session_state.bot_status = "🏁 Route Completed"
+                        st.toast("🎉 Mission complete! Bot arrived at final point.", icon="🙌")
+                    else:
+                        st.session_state.bot_status = f"🟢 Navigating Stop {st.session_state.current_stop_index + 1}"
+                        st.toast(f"✓ Stop #{curr_index + 1} finished! Steering to next destination.", icon="🚚")
+                    time.sleep(0.5)
+                    st.rerun()
+            else:
+                st.success("🎉 All scheduled office park deliveries have been completed successfully!")
+                if st.button("↩️ Send Bot Back to Home Base", use_container_width=True):
+                    st.session_state.bot_live_lat = 17.570514
+                    st.session_state.bot_live_lng = 78.432775
+                    st.session_state.delivery_stops = []
+                    st.session_state.current_stop_index = 0
+                    st.session_state.route_in_progress = False
+                    st.session_state.bot_status = "🔴 Offline / Idle"
+                    st.rerun()
+    else:
+        st.info("No active route driving right now. Pin map stops and click dispatch to initialize tracking loops.")
+
+    st.markdown("---")
+    
+    # LAUNCH DATA ROUTE DISPATCH SYSTEM
     st.markdown("### 🚀 Dispatch Mode")
-    disable_dispatch = len(st.session_state.delivery_stops) == 0
+    disable_dispatch = len(st.session_state.delivery_stops) == 0 or st.session_state.route_in_progress
     
     if st.button("⚡ Launch Route Path", disabled=disable_dispatch, use_container_width=True):
         stops = st.session_state.delivery_stops
@@ -142,51 +214,11 @@ with col_controls:
         lat3 = stops[2][0] if len(stops) > 2 else 0.0
         ln3  = stops[2][1] if len(stops) > 2 else 0.0
 
-
         dispatch_url = f"http://{bot_ip}/dispatch?lat1={lat1:.6f}&ln1={ln1:.6f}&lat2={lat2:.6f}&ln2={ln2:.6f}&lat3={lat3:.6f}&ln3={ln3:.6f}"
         
+        st.session_state.route_in_progress = True
+        st.session_state.current_stop_index = 0
+
         if demo_mode:
             with st.spinner("Encrypting path layout data strings..."):
                 time.sleep(1.2)
-            st.toast("🎉 Dispatch successful! Bot-01 leaving loading terminal.", icon="🚀")
-            st.session_state.bot_status = "🟢 Navigating Stop 1"
-            st.session_state.delivery_stops = []
-            time.sleep(1)
-            st.rerun()
-        else:
-            try:
-                urllib.request.urlopen(dispatch_url, timeout=2)
-                st.success("Vehicle route loaded. Robot starting drive.")
-                st.session_state.delivery_stops = []
-                time.sleep(0.5)
-                st.rerun()
-            except Exception:
-                st.warning("Data coordinates sent over network. Check vehicle terminal.")
-                st.session_state.delivery_stops = []
-                time.sleep(0.5)
-                st.rerun()
-
-
-# --- SECTION 4: BENCH TESTING & TELEMETRY SIMULATOR ---
-st.markdown("---")
-st.subheader("🧪 Telemetry Hardware Simulation (For Bench Testing Only)")
-st.write("Use this test tool to mock incoming data from your robot's cellular module.")
-
-c1, c2, c3, c4 = st.columns(4)
-with c1:
-    test_lat = st.number_input("Simulate Latitude", value=17.570514, format="%.6f") # Default matched to your testing zone
-with c2:
-    test_lng = st.number_input("Simulate Longitude", value=78.432775, format="%.6f") # Default matched to your testing zone
-with c3:
-    test_stat = st.selectbox("Simulate Mode Status", ["🔴 Offline / Idle", "🟢 Navigating Stop 1", "🟡 Waiting at Stop 1", "🟢 Returning Home", "⚠️ Hazard Stuck"])
-with c4:
-    test_batt = st.slider("Simulate Battery %", 0, 100, 100)
-
-if st.button("📥 Apply Simulated Updates", use_container_width=True):
-    st.session_state.bot_live_lat = test_lat
-    st.session_state.bot_live_lng = test_lng
-    st.session_state.bot_status = test_stat
-    st.session_state.bot_battery = str(test_batt)
-    st.toast("Telemetry data synced!", icon="📥")
-    time.sleep(0.5)
-    st.rerun()
