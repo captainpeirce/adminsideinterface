@@ -54,7 +54,8 @@ if not st.session_state.delivery_stops:
     st.sidebar.info("No stops selected. Click on the map to add locations.")
 else:
     for idx, stop in enumerate(st.session_state.delivery_stops):
-        st.sidebar.success(f"**Stop #{idx+1}**  \nLat: {stop:.6f}  \nLng: {stop:.6f}")
+        st.sidebar.success(f"**Stop #{idx+1}**  \nLat: {stop[0]:.6f}  \nLng: {stop[1]:.6f}")
+
 
 if st.sidebar.button("🧹 Clear Route Queue", use_container_width=True):
     st.session_state.delivery_stops = []
