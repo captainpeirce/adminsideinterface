@@ -79,6 +79,17 @@ h1, h2, h3 {{ color: {NAVY} !important; font-weight: 700 !important; }}
     color: #0a2540 !important;
     font-weight: 600 !important;
 }}
+/* 🗺️ MAP FIX: Stops the map from looking washed out */
+h1, h2, h3, p, span, label, li:not(.folium-map *) {{
+    color: inherit;
+}}
+
+.folium-map, .folium-map *, .leaflet-container, .leaflet-container * {{
+    color: initial !important;
+    background-color: initial !important;
+    background: initial !important;
+}}
+
 </style>
 """, unsafe_allow_html=True)
 
