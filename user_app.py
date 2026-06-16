@@ -114,38 +114,67 @@ elif st.session_state["page"] == "Request Delivery":
                 st.error("⚠️ Incomplete form: Please fill out Name, Pickup, and Dropoff fields.")
 
 # VIEW 3: LIVE TRACKING OVERVIEW
-# VIEW 3: LIVE TRACKING OVERVIEW (With background auto-refresh!)
+# VIEW 3: LIVE TRACKING OVERVIEW (With Live Folium Map Tracking!)
 elif st.session_state["page"] == "Live Tracking":
+    import folium
+    from streamlit_folium import st_folium
+
     st.title("📍 Real-Time Location Tracker")
     
-    # 🔄 LIVE AUTO-REFRESH CONTAINER (Checks the database every 3 seconds for bot updates!)
+    # 🔄 LIVE AUTO-REFRESH CONTAINER (Runs background checks every 3 seconds)
     @st.fragment(run_every=3)
     def render_live_user_tracking():
-        # Read the latest telemetry fields inside the repeating loop container
         current_bot_data = db.get_bot_telemetry()
+        delivery_stops = db.get_waypoints()
         
-        if current_bot_data["route_in_progress"]:
+        if current_bot_data["route_in_progress"] or "Returning" in current_bot_data["status"]:
             st.success("🚚 TURBO Rover is Driving Live!")
             
+            # Metric Columns Row Layout
             t1, t2 = st.columns(2)
             t1.metric(label="Current Mission Target Status", value=current_bot_data["status"])
             t2.metric(label="Rover Battery Reserve 🔋", value=f"{current_bot_data['battery']}%")
             
-            # Displays a highlighted info block showing coordinate movements
-            st.info(f"🛰️ Telemetry Stream Coordinates: Latitude `{current_bot_data['live_lat']:.6f}` | Longitude `{current_bot_data['live_lng']:.6f}`")
+            # --- CUSTOMER TELEMETRY MAP INJECTION ---
+            st.markdown("### 🗺️ Live Delivery Journey Tracker")
             
-            # Pro tip: This progress bar will match the admin tracker's position index!
-            total_waypoints = 3  # Maximum waypoint configuration limit
-            curr_waypoint = current_bot_data["current_stop_index"]
-            st.progress(min(1.0, float(curr_waypoint) / total_waypoints), text=f"Delivery Progress Tracked")
+            # Center the map canvas right on the bot's live location points
+            user_map = folium.Map(
+                location=[current_bot_data["live_lat"], current_bot_data["live_lng"]], 
+                zoom_start=18,
+                max_zoom=21
+            )
+            
+            # 1. Plot the Live Rover Marker Pin
+            folium.Marker(
+                location=[current_bot_data["live_lat"], current_bot_data["live_lng"]],
+                popup=f"TURBO Rover Status: {current_bot_data['status']}",
+                icon=folium.Icon(color="purple", icon="play", prefix="fa")
+            ).add_to(user_map)
+            
+            # 2. Plot the Remaining Destination Flag Waypoints
+            for idx, stop in enumerate(delivery_stops):
+                # Mark past drops as gray, active target as orange, future targets as red
+                flag_color = "gray" if idx < current_bot_data["current_stop_index"] else \
+                             ("orange" if idx == current_bot_data["current_stop_index"] else "red")
+                
+                folium.Marker(
+                    location=[stop[0], stop[1]],
+                    popup=f"Delivery Waypoint #{idx+1}",
+                    icon=folium.Icon(color=flag_color, icon="flag")
+                ).add_to(user_map)
+                
+            # 3. Render the dynamic path line connection tracing
+            if delivery_stops:
+                path_lines = [[current_bot_data["live_lat"], current_bot_data["live_lng"]]] + [[s[0], s[1]] for s in delivery_stops]
+                folium.PolyLine(locations=path_lines, color="#4589f5", weight=4, dash_array="6, 6").add_to(user_map)
+                
+            # Draw interactive map container window onto client side layout frame
+            st_folium(user_map, height=440, width="100%", key="user_live_delivery_tracking_map")
+            
+            st.info(f"🛰️ Telemetry Node Coordinates: Lat `{current_bot_data['live_lat']:.6f}` | Lng `{current_bot_data['live_lng']:.6f}`")
         else:
             st.info("System Idle. Once the admin dispatches a route path, live telemetry updates will stream here.")
 
-    # Run our background tracking fragment function
+    # Fire background data query loop container function
     render_live_user_tracking()
-
-
-# Catch-all view for incomplete secondary page features
-else:
-    st.title(f"📋 {st.session_state['page']}")
-    st.info("This section layout configuration is ready for custom elements.")
