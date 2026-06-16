@@ -34,12 +34,14 @@ st.sidebar.subheader("📥 Incoming User Requests")
 # 🔄 LIVE AUTO-REFRESH CONTAINER (Runs every 4 seconds without reloading the page!)
 # 🔄 LIVE AUTO-REFRESH CONTAINER (Runs every 4 seconds without reloading the page!)
 @st.fragment(run_every=4)
+# 🔄 LIVE AUTO-REFRESH CONTAINER (Runs every 4 seconds without reloading the page!)
+@st.fragment(run_every=4)
 def render_live_requests():
     # Fetch requests fresh inside the fragment container loop
     incoming_orders = db.get_all_requests()
     pending_orders = [o for o in incoming_orders if o["status"] == "Pending"]
     
-    # NEW: Clear button to empty the queue table instantly
+    # Clear button to empty the queue table instantly
     if pending_orders:
         if st.button("🗑️ Clear All Pending Requests", use_container_width=True, type="secondary"):
             db.clear_all_requests()
@@ -52,14 +54,18 @@ def render_live_requests():
     if not pending_orders:
         st.info("Searching for active orders...")
     else:
-        for order in pending_orders:
+        # Enumerate gives us a unique number 'idx' for every single row iteration loop step!
+        for idx, order in enumerate(pending_orders):
             with st.container(border=True):
                 st.markdown(f"**ID:** `{order['id']}` | **User:** {order['name']}")
                 st.markdown(f"📍 **From:** {order['pickup']}  \n🏁 **To:** {order['dropoff']}")
                 
-                # Button to assign this order to the bot's current path routing
-                if st.button(f"✅ Approve & Route {order['id']}", key=f"btn_{order['id']}", use_container_width=True):
+                # FIXED: Uses both the ID string AND unique loop index to guarantee key safety!
+                unique_key = f"btn_{order['id']}_{idx}"
+                
+                if st.button(f"✅ Approve & Route {order['id']}", key=unique_key, use_container_width=True):
                     st.toast(f"Approved order {order['id']}! Click on the map to set coordinates.", icon="📌")
+
 
     
     if not pending_orders:
@@ -138,31 +144,44 @@ with col_controls:
         st.toast("🚨 EMERGENCY HALT BROADCASTED!", icon="🛑")
         st.rerun()
 
-    st.markdown("---")
-    st.markdown("### 🚀 Dispatch Mode")
+        st.markdown("---")
+    st.markdown("### 🚀 Dispatch & Recovery Mode")
+    
     disable_dispatch = len(delivery_stops) == 0 or bot_data["route_in_progress"]
     
+    # Standard Launch Button
     if st.button("⚡ Launch Route Path", disabled=disable_dispatch, use_container_width=True):
         db.update_bot_telemetry(bot_data["live_lat"], bot_data["live_lng"], "🟢 Navigating Stop 1", bot_data["battery"], 0, True)
         st.toast("🚀 Rover mission launched!", icon="🛰️")
         time.sleep(0.5)
         st.rerun()
 
-    # Progress Tracking Progress Bars
-    if bot_data["route_in_progress"] and delivery_stops:
-        total_stops = len(delivery_stops)
-        curr_idx = bot_data["current_stop_index"]
-        st.progress(float(curr_idx) / float(total_stops), text=f"Waypoints: {curr_idx} of {total_stops} complete")
-        
-        if demo_mode and curr_idx < total_stops:
-            if st.button("🙋‍♂️ Simulate Customer Pickup (Advance Bot)", use_container_width=True):
-                target = delivery_stops[curr_idx]
-                next_idx = curr_idx + 1
-                new_status = "🏁 Route Completed" if next_idx >= total_stops else f"🟢 Navigating Stop {next_idx + 1}"
-                new_progress = False if next_idx >= total_stops else True
-                next_battery = str(max(0, int(bot_data["battery"]) - 5))
+    # NEW: Return to Hub Action Trigger (Shows up when idle or finished)
+        # NEW & UPDATED: Return to Hub Action Trigger with Home Check Alert Banner
+    if not bot_data["route_in_progress"]:
+        if st.button("🔄 Command Return to Admin Hub", type="secondary", use_container_width=True):
+            
+            # 1. Establish precise home coordinates variables
+            home_lat = 17.570514
+            home_lng = 78.432775
+            
+            # 2. Check if the vehicle's current location is already at home base
+            # (We round slightly to 5 decimal places to handle micro-coordinate floating points safely)
+            if round(bot_data["live_lat"], 5) == round(home_lat, 5) and round(bot_data["live_lng"], 5) == round(home_lng, 5):
+                st.error("⚠️ **Deployment Denied**: The vehicle is already parked inside the Admin Hub garage!")
+            else:
+                # 3. If it is away, set up the database return pathway cleanly
+                db.set_return_to_hub_route(start_lat=home_lat, start_lng=home_lng)
                 
-                db.update_bot_telemetry(target[0], target[1], new_status, next_battery, next_idx, new_progress)
-                st.toast("✓ Bot advanced to target destination!", icon="🚚")
+                # Start the vehicle moving backward toward base
+                db.update_bot_telemetry(
+                    lat=bot_data["live_lat"], 
+                    lng=bot_data["live_lng"], 
+                    status="🔄 Returning to Admin Hub", 
+                    battery=bot_data["battery"], 
+                    stop_idx=0, 
+                    in_progress=True
+                )
+                st.toast("🛸 Return trajectory mapped! Rover heading home.", icon="🏡")
                 time.sleep(0.5)
                 st.rerun()

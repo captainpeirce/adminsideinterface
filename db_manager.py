@@ -95,3 +95,16 @@ def clear_all_requests():
     c.execute("DELETE FROM requests")
     conn.commit()
     conn.close()
+def set_return_to_hub_route(start_lat=17.570514, start_lng=78.432775):
+    """Clears old points and forces a single direct return-to-base waypoint."""
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    
+    # 1. Clear out all the old completed delivery locations
+    c.execute("DELETE FROM waypoints")
+    
+    # 2. Inject the home base coordinates as the next target stop
+    c.execute("INSERT INTO waypoints (lat, lng) VALUES (?,?)", (start_lat, start_lng))
+    
+    conn.commit()
+    conn.close()

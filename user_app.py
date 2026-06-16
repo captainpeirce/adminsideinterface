@@ -114,19 +114,36 @@ elif st.session_state["page"] == "Request Delivery":
                 st.error("⚠️ Incomplete form: Please fill out Name, Pickup, and Dropoff fields.")
 
 # VIEW 3: LIVE TRACKING OVERVIEW
+# VIEW 3: LIVE TRACKING OVERVIEW (With background auto-refresh!)
 elif st.session_state["page"] == "Live Tracking":
     st.title("📍 Real-Time Location Tracker")
     
-    if bot_data["route_in_progress"]:
-        st.success("🚚 TURBO Rover is Driving Live!")
+    # 🔄 LIVE AUTO-REFRESH CONTAINER (Checks the database every 3 seconds for bot updates!)
+    @st.fragment(run_every=3)
+    def render_live_user_tracking():
+        # Read the latest telemetry fields inside the repeating loop container
+        current_bot_data = db.get_bot_telemetry()
         
-        t1, t2 = st.columns(2)
-        t1.metric(label="Current Mission Target Status", value=bot_data["status"])
-        t2.metric(label="Rover Battery Reserve 🔋", value=f"{bot_data['battery']}%")
-        
-        st.info(f"🛰️ Telemetry Stream Coordinates: Latitude `{bot_data['live_lat']:.6f}` | Longitude `{bot_data['live_lng']:.6f}`")
-    else:
-        st.info("System Idle. Once the admin dispatches a route path, live telemetry updates will stream here.")
+        if current_bot_data["route_in_progress"]:
+            st.success("🚚 TURBO Rover is Driving Live!")
+            
+            t1, t2 = st.columns(2)
+            t1.metric(label="Current Mission Target Status", value=current_bot_data["status"])
+            t2.metric(label="Rover Battery Reserve 🔋", value=f"{current_bot_data['battery']}%")
+            
+            # Displays a highlighted info block showing coordinate movements
+            st.info(f"🛰️ Telemetry Stream Coordinates: Latitude `{current_bot_data['live_lat']:.6f}` | Longitude `{current_bot_data['live_lng']:.6f}`")
+            
+            # Pro tip: This progress bar will match the admin tracker's position index!
+            total_waypoints = 3  # Maximum waypoint configuration limit
+            curr_waypoint = current_bot_data["current_stop_index"]
+            st.progress(min(1.0, float(curr_waypoint) / total_waypoints), text=f"Delivery Progress Tracked")
+        else:
+            st.info("System Idle. Once the admin dispatches a route path, live telemetry updates will stream here.")
+
+    # Run our background tracking fragment function
+    render_live_user_tracking()
+
 
 # Catch-all view for incomplete secondary page features
 else:
