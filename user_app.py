@@ -191,65 +191,19 @@ if st.session_state["page"] == "Home":
     """, unsafe_allow_html=True)
     
        # Four-Metric Layout Grid Row (Fixed with Clean Card Enclosures)
-        # ── METRIC CARDS REPLICATION GRID ─────────────────────────────────────────
-    st.markdown(f"""
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 28px;">
-        
-        <!-- CARD 1 -->
-        <div class="metric-card" style="background: white; border-radius: 16px; padding: 22px 18px; box-shadow: 0 4px 18px rgba(10,37,64,.08); text-align: center;">
-            <div style="color: {BLUE}; font-size: 2.2rem; font-weight: 800; margin-bottom: 4px;">
-                {active_deliveries_count}
-            </div>
-            <div style="color: #475569; font-size: 14px; font-weight: 700; margin-bottom: 2px;">
-                Active Deliveries
-            </div>
-            <div style="color: #22c55e; font-size: 12px; font-weight: 600;">
-                🔼 +1 from yesterday
-            </div>
-        </div>
-
-        <!-- CARD 2 -->
-        <div class="metric-card" style="background: white; border-radius: 16px; padding: 22px 18px; box-shadow: 0 4px 18px rgba(10,37,64,.08); text-align: center;">
-            <div style="color: {SUCCESS}; font-size: 2.2rem; font-weight: 800; margin-bottom: 4px;">
-                {total_completed_all_time}
-            </div>
-            <div style="color: #475569; font-size: 14px; font-weight: 700; margin-bottom: 2px;">
-                Total Completed
-            </div>
-            <div style="color: #64748b; font-size: 12px; font-weight: 600;">
-                All time
-            </div>
-        </div>
-
-        <!-- CARD 3 -->
-        <div class="metric-card" style="background: white; border-radius: 16px; padding: 22px 18px; box-shadow: 0 4px 18px rgba(10,37,64,.08); text-align: center;">
-            <div style="color: {WARNING}; font-size: 2.2rem; font-weight: 800; margin-bottom: 4px;">
-                8 min
-            </div>
-            <div style="color: #475569; font-size: 14px; font-weight: 700; margin-bottom: 2px;">
-                Avg Delivery Time
-            </div>
-            <div style="color: #ef4444; font-size: 12px; font-weight: 600;">
-                🔽 -1 min this week
-            </div>
-        </div>
-
-        <!-- CARD 4 -->
-        <div class="metric-card" style="background: white; border-radius: 16px; padding: 22px 18px; box-shadow: 0 4px 18px rgba(10,37,64,.08); text-align: center;">
-            <div style="color: {PURPLE}; font-size: 2.2rem; font-weight: 800; margin-bottom: 4px;">
-                4
-            </div>
-            <div style="color: #475569; font-size: 14px; font-weight: 700; margin-bottom: 2px;">
-                TURBO Units
-            </div>
-            <div style="color: #64748b; font-size: 12px; font-weight: 600;">
-                3 active · 1 charging
-            </div>
-        </div>
-
-    </div>
-    """, unsafe_allow_html=True)
-
+    m1, m2, m3, m4 = st.columns(4)
+    with m1:
+        with st.container(border=True):
+            st.metric(label="Active Deliveries", value=active_deliveries_count)
+    with m2:
+        with st.container(border=True):
+            st.metric(label="Total Completed", value=total_completed_all_time)
+    with m3:
+        with st.container(border=True):
+            st.metric(label="Avg Delivery Time", value="8 min")
+    with m4:
+        with st.container(border=True):
+            st.metric(label="TURBO Units Array", value="4")
 
     
     # Feature Display Blocks Layout Columns Row
