@@ -89,3 +89,9 @@ def clear_waypoints():
     conn.close()
 
 init_db()
+def clear_all_requests():
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("DELETE FROM requests")
+    conn.commit()
+    conn.close()

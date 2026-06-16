@@ -32,11 +32,35 @@ st.sidebar.markdown("---")
 st.sidebar.subheader("📥 Incoming User Requests")
 
 # 🔄 LIVE AUTO-REFRESH CONTAINER (Runs every 4 seconds without reloading the page!)
+# 🔄 LIVE AUTO-REFRESH CONTAINER (Runs every 4 seconds without reloading the page!)
 @st.fragment(run_every=4)
 def render_live_requests():
     # Fetch requests fresh inside the fragment container loop
     incoming_orders = db.get_all_requests()
     pending_orders = [o for o in incoming_orders if o["status"] == "Pending"]
+    
+    # NEW: Clear button to empty the queue table instantly
+    if pending_orders:
+        if st.button("🗑️ Clear All Pending Requests", use_container_width=True, type="secondary"):
+            db.clear_all_requests()
+            st.toast("💥 All pending user requests deleted!", icon="🗑️")
+            time.sleep(0.5)
+            st.rerun()
+            
+    st.markdown("---")
+    
+    if not pending_orders:
+        st.info("Searching for active orders...")
+    else:
+        for order in pending_orders:
+            with st.container(border=True):
+                st.markdown(f"**ID:** `{order['id']}` | **User:** {order['name']}")
+                st.markdown(f"📍 **From:** {order['pickup']}  \n🏁 **To:** {order['dropoff']}")
+                
+                # Button to assign this order to the bot's current path routing
+                if st.button(f"✅ Approve & Route {order['id']}", key=f"btn_{order['id']}", use_container_width=True):
+                    st.toast(f"Approved order {order['id']}! Click on the map to set coordinates.", icon="📌")
+
     
     if not pending_orders:
         st.info("Searching for active orders...")
