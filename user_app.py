@@ -142,12 +142,10 @@ if "page" not in st.session_state:
     st.session_state["page"] = "Home"
 
 # ── 5. SIDEBAR LOGO AND APP STATUS DOCK ──────────────────────────────────────
-st.sidebar.markdown(f"""
-<div style='text-align:center; padding: 10px 0;'>
-    <h2 style='color:white; margin:0; font-size:22px;'>NAVIGO</h2>
-    <p style='color:#64748b; font-size:11px; letter-spacing:1px; margin:2px 0 15px 0;'>THE FUTURE OF LOGISTICS</p>
-</div>
-""", unsafe_allow_html=True)
+# Sidebar Branding Logo Panel (Fixed to render your beautiful image!)
+st.sidebar.image("logo.png", use_container_width=True)
+st.sidebar.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
+
 
 # Fetch latest telemetry flags to evaluate hardware state updates live
 bot_data = db.get_bot_telemetry()
