@@ -185,35 +185,97 @@ if st.session_state["page"] == "Home":
         <p style='margin:12px 0; opacity:0.85; font-size:1.05rem; max-width:600px;'>
             Your Autonomous Campus Delivery Companion — faster, smarter, and fully trackable. Zero waiting. Zero hassle. Pure efficiency.
         </p>
+        <div style='display:flex; gap:12px; margin-top:15px;'>
+            <span class='badge-success'>● TURBO Online</span>
+            <span class='badge-info'>⚡ Avg Delivery: 8 min</span>
+            <span class='badge-warning'>📦 284 Deliveries Completed</span>
+        </div>
+    </div>
+
+    <!-- 📊 REPLICATED METRIC CARDS GRID -->
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 35px;">
+        <div style="background: white; border-radius: 16px; padding: 22px 18px; box-shadow: 0 4px 18px rgba(10,37,64,.06); text-align: center; border: 1px solid #e2e8f0;">
+            <div style="color: {BLUE}; font-size: 2.2rem; font-weight: 800; margin-bottom: 4px;">{active_deliveries_count}</div>
+            <div style="color: #475569; font-size: 14px; font-weight: 700; margin-bottom: 2px;">Active Deliveries</div>
+            <div style="color: #64748b; font-size: 12px; font-weight: 600;">+1 from yesterday</div>
+        </div>
+        <div style="background: white; border-radius: 16px; padding: 22px 18px; box-shadow: 0 4px 18px rgba(10,37,64,.06); text-align: center; border: 1px solid #e2e8f0;">
+            <div style="color: {SUCCESS}; font-size: 2.2rem; font-weight: 800; margin-bottom: 4px;">{total_completed_all_time}</div>
+            <div style="color: #475569; font-size: 14px; font-weight: 700; margin-bottom: 2px;">Total Completed</div>
+            <div style="color: #64748b; font-size: 12px; font-weight: 600;">All time</div>
+        </div>
+        <div style="background: white; border-radius: 16px; padding: 22px 18px; box-shadow: 0 4px 18px rgba(10,37,64,.06); text-align: center; border: 1px solid #e2e8f0;">
+            <div style="color: {WARNING}; font-size: 2.2rem; font-weight: 800; margin-bottom: 4px;">8 min</div>
+            <div style="color: #475569; font-size: 14px; font-weight: 700; margin-bottom: 2px;">Avg Delivery Time</div>
+            <div style="color: #64748b; font-size: 12px; font-weight: 600;">-1 min this week</div>
+        </div>
+        <div style="background: white; border-radius: 16px; padding: 22px 18px; box-shadow: 0 4px 18px rgba(10,37,64,.06); text-align: center; border: 1px solid #e2e8f0;">
+            <div style="color: {PURPLE}; font-size: 2.2rem; font-weight: 800; margin-bottom: 4px;">4</div>
+            <div style="color: #475569; font-size: 14px; font-weight: 700; margin-bottom: 2px;">TURBO Units</div>
+            <div style="color: #64748b; font-size: 12px; font-weight: 600;">3 active · 1 charging</div>
+        </div>
+    </div>
+
+    <!-- 📌 CORE FEATURES ROW -->
+    <h3 style='color:#0a2540; margin-top:20px; margin-bottom:15px;'>📌 Core Features</h3>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 35px;">
+        <div class="feature-box"><b>📍 Geo Tracking</b><br><span style='font-size:13px; color:#64748b;'>Real-time live map of TURBO's exact position on campus.</span></div>
+        <div class="feature-box"><b>🔒 End-to-End Security</b><br><span style='font-size:13px; color:#64748b;'>Lockable compartment + live camera. Your item, protected.</span></div>
+        <div class="feature-box"><b>🔔 Smart Notifications</b><br><span style='font-size:13px; color:#64748b;'>Instant alerts for every delivery milestone automatically.</span></div>
+        <div class="feature-box"><b>🛠️ Fleet Maintenance</b><br><span style='font-size:13px; color:#64748b;'>Health dashboard, battery status and issue reporting.</span></div>
+    </div>
+
+    <!-- 📦 HOW NAVIGO WORKS SECTION -->
+    <h3 style='color:#0a2540; margin-top:20px; margin-bottom:15px;'>📦 How NAVIGO Works</h3>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 35px;">
+        <div style="background: white; border-radius: 16px; padding: 24px 18px; text-align: center; box-shadow: 0 4px 16px rgba(10,37,64,.05); border: 1px solid #e2e8f0;">
+            <div style="background: #eef4ff; color: {BLUE}; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; font-weight: 700; font-size: 12px;">STEP 1</div>
+            <b style="color: #0a2540; display: block; margin-bottom: 6px;">Place Request</b>
+            <span style="font-size: 12px; color: #64748b;">Submit via the app in seconds - pick item, location and priority level.</span>
+        </div>
+        <div style="background: white; border-radius: 16px; padding: 24px 18px; text-align: center; box-shadow: 0 4px 16px rgba(10,37,64,.05); border: 1px solid #e2e8f0;">
+            <div style="background: #e6fffa; color: {TEAL}; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; font-weight: 700; font-size: 12px;">STEP 2</div>
+            <b style="color: #0a2540; display: block; margin-bottom: 6px;">TURBO Assigned</b>
+            <span style="font-size: 12px; color: #64748b;">The nearest available TURBO unit is dispatched to your pickup point.</span>
+        </div>
+        <div style="background: white; border-radius: 16px; padding: 24px 18px; text-align: center; box-shadow: 0 4px 16px rgba(10,37,64,.05); border: 1px solid #e2e8f0;">
+            <div style="background: #f3e8ff; color: {PURPLE}; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; font-weight: 700; font-size: 12px;">STEP 3</div>
+            <b style="color: #0a2540; display: block; margin-bottom: 6px;">Live Tracking</b>
+            <span style="font-size: 12px; color: #64748b;">Follow TURBO's journey on the live campus map in real-time.</span>
+        </div>
+        <div style="background: white; border-radius: 16px; padding: 24px 18px; text-align: center; box-shadow: 0 4px 16px rgba(10,37,64,.05); border: 1px solid #e2e8f0;">
+            <div style="background: #f0fdf4; color: {SUCCESS}; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; font-weight: 700; font-size: 12px;">STEP 4</div>
+            <b style="color: #0a2540; display: block; margin-bottom: 6px;">Delivered</b>
+            <span style="font-size: 12px; color: #64748b;">Package reaches your door. Rate your experience and help us improve!</span>
+        </div>
+    </div>
+
+    <!-- 🌐 DESIGNED FOR SECTION -->
+    <h3 style='color:#0a2540; margin-top:20px; margin-bottom:15px;'>🌐 Designed For</h3>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px;">
+        <div style="background: white; border-radius: 12px; padding: 16px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,.04); border: 1px solid #e2e8f0;">
+            <span style="font-size: 24px; display: block; margin-bottom: 6px;">🎓</span>
+            <b style="color: #0a2540; font-size: 13px;">Universities</b>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 16px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,.04); border: 1px solid #e2e8f0;">
+            <span style="font-size: 24px; display: block; margin-bottom: 6px;">🏡</span>
+            <b style="color: #0a2540; font-size: 13px;">Gated Communities</b>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 16px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,.04); border: 1px solid #e2e8f0;">
+            <span style="font-size: 24px; display: block; margin-bottom: 6px;">🏢</span>
+            <b style="color: #0a2540; font-size: 13px;">Corporate Parks</b>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 16px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,.04); border: 1px solid #e2e8f0;">
+            <span style="font-size: 24px; display: block; margin-bottom: 6px;">🌳</span>
+            <b style="color: #0a2540; font-size: 13px;">Smart Public Spaces</b>
+        </div>
     </div>
     """, unsafe_allow_html=True)
-    
-       # Four-Metric Layout Grid Row (Fixed with Clean Card Enclosures)
-    m1, m2, m3, m4 = st.columns(4)
-    with m1:
-        with st.container(border=True):
-            st.metric(label="Active Deliveries", value=active_deliveries_count)
-    with m2:
-        with st.container(border=True):
-            st.metric(label="Total Completed", value=total_completed_all_time)
-    with m3:
-        with st.container(border=True):
-            st.metric(label="Avg Delivery Time", value="8 min")
-    with m4:
-        with st.container(border=True):
-            st.metric(label="TURBO Units Array", value="4")
 
-    
-    # Feature Display Blocks Layout Columns Row
-    f1, f2, f3, f4 = st.columns(4)
-    with f1:
-        st.markdown("<div class='feature-box'><b>📍 Geo Tracking</b><br><span style='font-size:13px; color:#64748b;'>Real-time live map of TURBO's exact position on campus.</span></div>", unsafe_allow_html=True)
-    with f2:
-        st.markdown("<div class='feature-box'><b>🔒 End-to-End Security</b><br><span style='font-size:13px; color:#64748b;'>Lockable compartment + live camera. Your items, protected.</span></div>", unsafe_allow_html=True)
-    with f3:
-        st.markdown("<div class='feature-box'><b>🔔 Smart Notifications</b><br><span style='font-size:13px; color:#64748b;'>Instant alerts for every delivery milestone automatically.</span></div>", unsafe_allow_html=True)
-    with f4:
-        st.markdown("<div class='feature-box'><b>🛠️ Fleet Maintenance</b><br><span style='font-size:13px; color:#64748b;'>Health dashboard, battery status and issue reporting.</span></div>", unsafe_allow_html=True)
+    # Bottom Call-To-Action Button
+    if st.button("🔵 Request a Delivery Now →"):
+        st.session_state["page"] = "Request Delivery"
+        st.rerun()
 
 # PANEL VIEW B: FORM LOGISTICS DEPLOYMENT FIELD DOCK
 elif st.session_state["page"] == "Request Delivery":
