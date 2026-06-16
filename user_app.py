@@ -22,25 +22,25 @@ WARNING = "#f59e0b"
 DANGER  = "#ef4444"
 
 # ── 3. CLEAN GLOBAL UI STYLE RULES (REVERTED TO ORIGINAL PALETTE) ───────────
+# ── 3. CLEAN GLOBAL UI STYLE RULES (EXACT CARD REPLICATION) ────────────────
 st.markdown(f"""
 <style>
-/* App Body Background - Restored to original clean light gradient */
+/* App Body Background - Clean Light Gradient */
 [data-testid="stAppViewContainer"] {{ 
     background: linear-gradient(180deg, #eef4ff 0%, #f8fbff 100%) !important; 
     color: #0a2540 !important;
 }}
 
-/* Clear block padding overrides safely */
+/* Clear padding safely */
 [data-testid="block-container"] {{
     background-color: transparent !important;
     padding-top: 1.4rem !important;
     padding-bottom: 2.5rem !important;
 }}
 
-/* Sidebar Design Elements - Deep Sleek Blue preserved */
+/* Sidebar Design Elements */
 [data-testid="stSidebar"] {{ 
     background: linear-gradient(180deg, #071a30 0%, {NAVY} 100%) !important; 
-    border-right: none !important;
 }}
 [data-testid="stSidebar"] .stButton > button {{
     width: 100%; background: transparent; border: none; text-align: left;
@@ -52,30 +52,24 @@ st.markdown(f"""
     color: white !important;
 }}
 
-/* Standardized Content Form Wrapping Card */
-div[data-testid="stForm"] {{
+/* FORCE WHITE METRIC AND FEATURE CARDS (This fixes your bug!) */
+.metric-card, .feature-box, .step-card, div[data-testid="stForm"] {{
     background-color: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    border-radius: 18px !important;
-    padding: 22px 20px !important;
-    box-shadow: 0 4px 20px rgba(10,37,64,.09) !important;
-}}
-
-/* Custom Styling Feature Content Boxes */
-.feature-box {{
-    background: white !important; 
-    border-radius: 16px; 
-    padding: 20px;
-    box-shadow: 0 4px 15px rgba(10,37,64,.06) !important; 
-    height: 100%;
-    border-top: 4px solid {BLUE} !important;
+    background: #ffffff !important;
+    border-radius: 16px !important;
+    padding: 22px 18px !important;
+    box-shadow: 0 10px 25px rgba(10, 37, 64, 0.05) !important;
+    border: 1px solid #e2e8f0 !important;
     color: #1e293b !important;
-}}
-.feature-box b {{
-    color: #0a2540 !important;
+    display: block !important;
 }}
 
-/* Hero Header Card Container - High Contrast Restored */
+/* Maintain blue top bar accent strictly for feature boxes */
+.feature-box {{
+    border-top: 4px solid {BLUE} !important;
+}}
+
+/* Hero Header Card Container */
 .hero-card {{ 
     background: linear-gradient(135deg, #071a30 0%, #0f3460 50%, #1a5276 100%) !important; 
     border-radius: 24px; padding: 36px 32px; color: white !important; margin-bottom: 28px; 
@@ -84,24 +78,13 @@ div[data-testid="stForm"] {{
 }}
 .hero-card h1, .hero-card p {{ color: white !important; }}
 
-/* Metric Typography Elements - Dark Navy text over clean white fields */
-[data-testid="stMetricLabel"] {{ 
-    color: #475569 !important; 
-    font-weight: 700 !important; 
-    font-size: 15px !important; 
-}}
-[data-testid="stMetricValue"] {{ 
-    color: {NAVY} !important; 
-    font-weight: 800 !important; 
-}}
-
-/* Core Main Structural Section Headings */
+/* Typography Controls */
 h1, h2, h3 {{ 
     color: {NAVY} !important; 
     font-weight: 700 !important; 
 }}
 
-/* Sleek Light Input Fields - Clean High Contrast Visible Text */
+/* Form Elements Input Fixes */
 .stTextInput input, .stSelectbox div[data-baseweb="select"], .stTextArea textarea {{
     background-color: #ffffff !important;
     color: #0a2540 !important;
@@ -109,8 +92,6 @@ h1, h2, h3 {{
     border-radius: 12px !important;
     font-weight: 600 !important;
 }}
-
-/* Form Input Element Label Tags Visibility Fix */
 [data-testid="stWidgetLabel"], [data-testid="stRadio"] label p {{
     color: #0a2540 !important;
     font-weight: 600 !important;
@@ -125,17 +106,9 @@ h1, h2, h3, p, span, label, li:not(.folium-map *) {{
     background-color: initial !important;
     background: initial !important;
 }}
-/* Fix to give the new metric containers a beautiful white card shadow look */
-div[data-testid="stVerticalBlockBorderWrapper"] {{
-    background-color: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 16px !important;
-    box-shadow: 0 4px 18px rgba(10,37,64,.06) !important;
-    padding: 10px !important;
-}}
-
 </style>
 """, unsafe_allow_html=True)
+
 
 # ── 4. NAVIGATION STATE CONTROL ──────────────────────────────────────────────
 if "page" not in st.session_state:
