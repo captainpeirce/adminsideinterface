@@ -14,7 +14,6 @@ st.set_page_config(
 # Pull current values from the database
 bot_data = db.get_bot_telemetry()
 delivery_stops = db.get_waypoints()
-incoming_orders = db.get_all_requests()  # Read user requests live!
 
 st.title("🛰️ Precinct Delivery Bot - Advanced Control Center")
 st.write("Manage route dispatching, monitor vehicle health, and process incoming user requests live.")
@@ -29,24 +28,31 @@ st.sidebar.subheader("📊 Live Telemetry Health")
 st.sidebar.metric(label="Status Machine Mode", value=bot_data["status"])
 st.sidebar.metric(label="Battery Reserve 🔋", value=f"{bot_data['battery']}%")
 
-# NEW SECTION: INCOMING ORDERS QUEUE (This fixes your bug!)
 st.sidebar.markdown("---")
 st.sidebar.subheader("📥 Incoming User Requests")
 
-if not incoming_orders:
-    st.sidebar.info("No active orders submitted by users yet.")
-else:
-    for order in incoming_orders:
-        # Check if the order is still waiting for a bot dispatch
-        if order["status"] == "Pending":
-            with st.sidebar.container(border=True):
+# 🔄 LIVE AUTO-REFRESH CONTAINER (Runs every 4 seconds without reloading the page!)
+@st.fragment(run_every=4)
+def render_live_requests():
+    # Fetch requests fresh inside the fragment container loop
+    incoming_orders = db.get_all_requests()
+    pending_orders = [o for o in incoming_orders if o["status"] == "Pending"]
+    
+    if not pending_orders:
+        st.info("Searching for active orders...")
+    else:
+        for order in pending_orders:
+            with st.container(border=True):
                 st.markdown(f"**ID:** `{order['id']}` | **User:** {order['name']}")
                 st.markdown(f"📍 **From:** {order['pickup']}  \n🏁 **To:** {order['dropoff']}")
                 
-                # Button to assign this order to the bot's current map routing path
-                if st.button(f"✅ Approve & Route {order['id']}", key=order['id'], use_container_width=True):
-                    st.toast(f"Approved order {order['id']}! Now click on the map to set coordinates.", icon="📌")
-                    time.sleep(0.5)
+                # Button to assign this order to the bot's current path routing
+                if st.button(f"✅ Approve & Route {order['id']}", key=f"btn_{order['id']}", use_container_width=True):
+                    st.toast(f"Approved order {order['id']}! Click on the map to set coordinates.", icon="📌")
+                    # We can use a session variable to handle mapping next if needed
+
+# Execute our live background polling fragment function
+render_live_requests()
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("📋 Delivery Stop Queue")
@@ -56,7 +62,7 @@ else:
     for idx, stop in enumerate(delivery_stops):
         st.sidebar.success(f"**Stop #{idx+1}**  \nLat: {stop[0]:.6f}  \nLng: {stop[1]:.6f}")
 
-if st.sidebar.button("导 Clear Route Queue", use_container_width=True):
+if st.sidebar.button("🧹 Clear Route Queue", use_container_width=True):
     db.clear_waypoints()
     db.update_bot_telemetry(17.570514, 78.432775, "🔴 Offline / Idle", "100", 0, False)
     st.toast("🧹 Route workspace cleared!", icon="🗑️")
@@ -91,7 +97,7 @@ with col_map:
 
     map_data = st_folium(m, height=480, width="100%", key="main_precinct_map")
 
-    # Capture user mouse map clicks
+    # Capture user mouse map clicks safely without interrupting automatic re-runs
     if map_data and map_data.get("last_clicked"):
         clicked_coords = (map_data["last_clicked"]["lat"], map_data["last_clicked"]["lng"])
         if clicked_coords not in delivery_stops and not bot_data["route_in_progress"]:
