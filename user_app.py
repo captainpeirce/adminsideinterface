@@ -106,6 +106,36 @@ h1, h2, h3, p, span, label, li:not(.folium-map *) {{
     background-color: initial !important;
     background: initial !important;
 }}
+/* 📊 FORCES WHITE BACKGROUND BOX ENCLOSURES ONLY FOR THE HOME PAGE METRIC ROW */
+[data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"]:has(div[data-testid="column"]:nth-child(4)) > div[data-testid="column"] > div {{
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    border-radius: 16px !important;
+    padding: 22px 18px !important;
+    box-shadow: 0 10px 25px rgba(10, 37, 64, 0.06) !important;
+    border: 1px solid #e2e8f0 !important;
+    text-align: center !important;
+}}
+
+/* Ensures clean text alignments inside our specific home page metrics cards */
+[data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"]:has(div[data-testid="column"]:nth-child(4)) div[data-testid="stMetricValue"], 
+[data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"]:has(div[data-testid="column"]:nth-child(4)) div[data-testid="stMetricLabel"] {{
+    display: flex !important;
+    justify-content: center !important;
+    text-align: center !important;
+    width: 100% !important;
+}}
+
+}}
+
+/* Clean typography fixes to center text alignments inside your new cards */
+div[data-testid="stMetricValue"], div[data-testid="stMetricLabel"] {{
+    display: flex !important;
+    justify-content: center !important;
+    text-align: center !important;
+    width: 100% !important;
+}}
+
 </style>
 """, unsafe_allow_html=True)
 
