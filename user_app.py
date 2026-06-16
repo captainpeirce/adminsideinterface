@@ -21,77 +21,105 @@ SUCCESS = "#22c55e"
 WARNING = "#f59e0b"
 DANGER  = "#ef4444"
 
-# ── 3. CLEAN GLOBAL UI STYLE RULES ───────────────────────────────────────────
+# ── 3. CLEAN GLOBAL UI STYLE RULES (FORCED MIDNIGHT THEME) ───────────────────
 st.markdown(f"""
 <style>
-/* App Body Background */
+/* App Body Background - Deep Midnight Sky */
 [data-testid="stAppViewContainer"] {{ 
-    background: linear-gradient(180deg, #eef4ff 0%, #f8fbff 100%); 
+    background: linear-gradient(180deg, #0b132b 0%, #1c2541 100%) !important; 
+    color: #ffffff !important;
 }}
 
-/* Sidebar Design Elements */
+/* Clear any default layout overrides */
+[data-testid="block-container"] {{
+    background-color: transparent !important;
+    padding-top: 2rem !important;
+}}
+
+/* Sidebar Design Elements - Deep Sleek Blue */
 [data-testid="stSidebar"] {{ 
-    background: linear-gradient(180deg, #071a30 0%, {NAVY} 100%) !important; 
+    background: linear-gradient(180deg, #0b132b 0%, {NAVY} 100%) !important; 
+    border-right: 1px solid #3a506b !important;
 }}
 [data-testid="stSidebar"] .stButton > button {{
     width:100%; background:transparent; border:none; text-align:left;
-    padding:10px 16px; border-radius:10px; color:#e2e8f0 !important;
-    font-size:14px; transition:all .2s; margin-bottom:2px;
+    padding:12px 18px; border-radius:10px; color:#e2e8f0 !important;
+    font-size:14px; font-weight: 600; transition:all .2s; margin-bottom:4px;
 }}
 [data-testid="stSidebar"] .stButton > button:hover {{
-    background:rgba(69,137,245,0.25) !important;
+    background:rgba(69,137,245,0.2) !important;
     color:white !important;
 }}
 
-/* Custom Styling Feature Content Boxes */
-.feature-box {{
-    background: white; border-radius: 16px; padding: 20px;
-    box-shadow: 0 4px 15px rgba(10,37,64,.06); height: 100%;
-    border-top: 4px solid {BLUE};
-    color: #1e293b !important;
+/* Structured Main Content Box (Wraps your form nicely) */
+div[data-testid="stForm"] {{
+    background-color: #1c2541 !important;
+    border: 1px solid #3a506b !important;
+    border-radius: 20px !important;
+    padding: 2.5rem !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
 }}
 
-/* Hero Header Card Container */
-.hero-card {{ 
-    background: linear-gradient(135deg, #071a30 0%, #0f3460 50%, #1a5276 100%); 
-    border-radius: 24px; padding: 36px 32px; color: white !important; margin-bottom: 28px; 
-}}
-.hero-card h1, .hero-card p {{ color: white !important; }}
-
-/* Metric Typography Elements */
-[data-testid="stMetricLabel"] {{ color: #475569 !important; font-weight: 700 !important; font-size: 15px !important; }}
-[data-testid="stMetricValue"] {{ color: {NAVY} !important; font-weight: 800 !important; }}
-
-/* Core Main Structural Section Headings */
-h1, h2, h3 {{ color: {NAVY} !important; font-weight: 700 !important; }}
-
-/* High Contrast Input Boxes - Eliminates Invisible Typing */
-.stTextInput input, .stSelectbox div[data-baseweb="select"], .stTextArea textarea {{
-    background-color: #ffffff !important;
-    color: #0a2540 !important;
-    border: 2px solid #cbd5e1 !important;
-    border-radius: 12px !important;
-    font-weight: 600 !important;
+/* Header and Section Typography */
+h1, h2, h3, span, li {{ 
+    color: #ffffff !important; 
+    font-weight: 700 !important;
+    letter-spacing: -0.5px;
 }}
 
-/* Form Input Element Label Tags Visibility Fix */
+/* Widget Labels (Form text above inputs) */
 [data-testid="stWidgetLabel"], [data-testid="stRadio"] label p {{
-    color: #0a2540 !important;
+    color: #cbd5e1 !important;
     font-weight: 600 !important;
+    font-size: 14px !important;
+    margin-bottom: 6px !important;
 }}
-/* 🗺️ MAP FIX: Stops the map from looking washed out */
+
+/* Sleek Dark Input Fields - High Contrast Visibility */
+.stTextInput input, .stSelectbox div[data-baseweb="select"], .stTextArea textarea {{
+    background-color: #0b132b !important;
+    color: #ffffff !important;
+    border: 2px solid #3a506b !important;
+    border-radius: 12px !important;
+    font-weight: 500 !important;
+    padding: 10px 14px !important;
+}}
+
+/* Input Box Highlight Effect on Selection */
+.stTextInput input:focus, .stTextArea textarea:focus {{
+    border-color: {BLUE} !important;
+    box-shadow: 0 0 0 2px rgba(69, 137, 245, 0.3) !important;
+}}
+
+/* Form Button Alignment Styling */
+.stButton > button {{
+    background: linear-gradient(135deg, {BLUE}, {TEAL}) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+    font-weight: 700 !important;
+    padding: 0.6rem 2rem !important;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 14px rgba(69, 137, 245, 0.3) !important;
+    transition: all 0.2s ease !important;
+}}
+.stButton > button:hover {{
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(69, 137, 245, 0.5) !important;
+}}
+
+/* 🗺️ MAP PROTECTION RULES: Keeps map tiles crisp and colored */
 h1, h2, h3, p, span, label, li:not(.folium-map *) {{
     color: inherit;
 }}
-
 .folium-map, .folium-map *, .leaflet-container, .leaflet-container * {{
     color: initial !important;
     background-color: initial !important;
     background: initial !important;
 }}
-
 </style>
 """, unsafe_allow_html=True)
+
 
 # ── 4. NAVIGATION STATE CONTROL ──────────────────────────────────────────────
 if "page" not in st.session_state:
