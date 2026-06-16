@@ -125,6 +125,15 @@ h1, h2, h3, p, span, label, li:not(.folium-map *) {{
     background-color: initial !important;
     background: initial !important;
 }}
+/* Fix to give the new metric containers a beautiful white card shadow look */
+div[data-testid="stVerticalBlockBorderWrapper"] {{
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 18px rgba(10,37,64,.06) !important;
+    padding: 10px !important;
+}}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -181,14 +190,21 @@ if st.session_state["page"] == "Home":
     </div>
     """, unsafe_allow_html=True)
     
-    # Four-Metric Layout Grid Row Elements Data Displays
+       # Four-Metric Layout Grid Row (Fixed with Clean Card Enclosures)
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric(label="Active Deliveries", value=active_deliveries_count if active_deliveries_count > 0 else "0")
-    m2.metric(label="Total Completed", value=total_completed_all_time)
-    m3.metric(label="Avg Delivery Time", value="8 min")
-    m4.metric(label="TURBO Units Array", value="4")
-        
-    st.markdown("<br><h3>📌 Core Features</h3>", unsafe_allow_html=True)
+    with m1:
+        with st.container(border=True):
+            st.metric(label="Active Deliveries", value=active_deliveries_count)
+    with m2:
+        with st.container(border=True):
+            st.metric(label="Total Completed", value=total_completed_all_time)
+    with m3:
+        with st.container(border=True):
+            st.metric(label="Avg Delivery Time", value="8 min")
+    with m4:
+        with st.container(border=True):
+            st.metric(label="TURBO Units Array", value="4")
+
     
     # Feature Display Blocks Layout Columns Row
     f1, f2, f3, f4 = st.columns(4)
