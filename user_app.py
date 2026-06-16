@@ -2,7 +2,7 @@ import streamlit as st
 import plotly.graph_objects as go
 import datetime, random
 import pandas as pd
-import db_manager as db  # Shared database link!
+import db_manager as db  # Shared database engine link!
 
 # ── 1. PAGE CONFIGURATION ────────────────────────────────────────────────────
 st.set_page_config(
@@ -12,169 +12,232 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── 2. INITIALIZE NAVIGATION STATE ───────────────────────────────────────────
+# ── 2. PALETTE CONSTANTS ─────────────────────────────────────────────────────
+NAVY    = "#0a2540"
+BLUE    = "#4589f5"
+TEAL    = "#06b6d4"
+PURPLE  = "#8b5cf6"
+SUCCESS = "#22c55e"
+WARNING = "#f59e0b"
+DANGER  = "#ef4444"
+
+# ── 3. CLEAN GLOBAL UI STYLE RULES ───────────────────────────────────────────
+st.markdown(f"""
+<style>
+/* App Body Background */
+[data-testid="stAppViewContainer"] {{ 
+    background: linear-gradient(180deg, #eef4ff 0%, #f8fbff 100%); 
+}}
+
+/* Sidebar Design Elements */
+[data-testid="stSidebar"] {{ 
+    background: linear-gradient(180deg, #071a30 0%, {NAVY} 100%) !important; 
+}}
+[data-testid="stSidebar"] .stButton > button {{
+    width:100%; background:transparent; border:none; text-align:left;
+    padding:10px 16px; border-radius:10px; color:#e2e8f0 !important;
+    font-size:14px; transition:all .2s; margin-bottom:2px;
+}}
+[data-testid="stSidebar"] .stButton > button:hover {{
+    background:rgba(69,137,245,0.25) !important;
+    color:white !important;
+}}
+
+/* Custom Styling Feature Content Boxes */
+.feature-box {{
+    background: white; border-radius: 16px; padding: 20px;
+    box-shadow: 0 4px 15px rgba(10,37,64,.06); height: 100%;
+    border-top: 4px solid {BLUE};
+    color: #1e293b !important;
+}}
+
+/* Hero Header Card Container */
+.hero-card {{ 
+    background: linear-gradient(135deg, #071a30 0%, #0f3460 50%, #1a5276 100%); 
+    border-radius: 24px; padding: 36px 32px; color: white !important; margin-bottom: 28px; 
+}}
+.hero-card h1, .hero-card p {{ color: white !important; }}
+
+/* Metric Typography Elements */
+[data-testid="stMetricLabel"] {{ color: #475569 !important; font-weight: 700 !important; font-size: 15px !important; }}
+[data-testid="stMetricValue"] {{ color: {NAVY} !important; font-weight: 800 !important; }}
+
+/* Core Main Structural Section Headings */
+h1, h2, h3 {{ color: {NAVY} !important; font-weight: 700 !important; }}
+
+/* High Contrast Input Boxes - Eliminates Invisible Typing */
+.stTextInput input, .stSelectbox div[data-baseweb="select"], .stTextArea textarea {{
+    background-color: #ffffff !important;
+    color: #0a2540 !important;
+    border: 2px solid #cbd5e1 !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+}}
+
+/* Form Input Element Label Tags Visibility Fix */
+[data-testid="stWidgetLabel"], [data-testid="stRadio"] label p {{
+    color: #0a2540 !important;
+    font-weight: 600 !important;
+}}
+</style>
+""", unsafe_allow_html=True)
+
+# ── 4. NAVIGATION STATE CONTROL ──────────────────────────────────────────────
 if "page" not in st.session_state:
     st.session_state["page"] = "Home"
 
-# ── 3. SIDEBAR NAVIGATION PANELS ─────────────────────────────────────────────
-st.sidebar.title("NAVIGO")
-st.sidebar.caption("THE FUTURE OF LOGISTICS")
+# ── 5. SIDEBAR LOGO AND APP STATUS DOCK ──────────────────────────────────────
+st.sidebar.markdown(f"""
+<div style='text-align:center; padding: 10px 0;'>
+    <h2 style='color:white; margin:0; font-size:22px;'>NAVIGO</h2>
+    <p style='color:#64748b; font-size:11px; letter-spacing:1px; margin:2px 0 15px 0;'>THE FUTURE OF LOGISTICS</p>
+</div>
+""", unsafe_allow_html=True)
 
-# Read current database variables live
+# Fetch latest telemetry flags to evaluate hardware state updates live
 bot_data = db.get_bot_telemetry()
 requests_list = db.get_all_requests()
 
-# Live Sidebar Telemetry Badge
-if bot_data["route_in_progress"]:
-    st.sidebar.success(f"● TURBO: En-Route")
-else:
-    st.sidebar.error("● TURBO: Offline / Idle")
+is_active = bot_data["route_in_progress"] or "Returning" in bot_data["status"]
+status_badge = "● TURBO Online" if is_active else "● TURBO Idle"
+status_color = SUCCESS if is_active else WARNING
 
-st.sidebar.markdown("---")
+st.sidebar.markdown(f"""
+<div style='text-align:center; margin-bottom:20px;'>
+    <span style='background:rgba(34,197,94,0.15); color:{status_color}; padding:6px 16px; border-radius:20px; font-size:12px; font-weight:700;'>
+        {status_badge}
+    </span>
+</div>
+""", unsafe_allow_html=True)
 
-# Restored Original Sidebar Buttons
-if st.sidebar.button("🏠 Home", use_container_width=True): 
-    st.session_state["page"] = "Home"
-if st.sidebar.button("📦 Request Delivery", use_container_width=True): 
-    st.session_state["page"] = "Request Delivery"
-if st.sidebar.button("📍 Live Tracking", use_container_width=True): 
-    st.session_state["page"] = "Live Tracking"
-if st.sidebar.button("🔔 Notifications", use_container_width=True): 
-    st.session_state["page"] = "Notifications"
-if st.sidebar.button("📋 Helpdesk", use_container_width=True): 
-    st.session_state["page"] = "Helpdesk"
-if st.sidebar.button("⭐ Feedback", use_container_width=True): 
-    st.session_state["page"] = "Feedback"
+# Sidebar Button Items Mapping Array
+if st.sidebar.button("🏠 Home"): st.session_state["page"] = "Home"
+if st.sidebar.button("📦 Request Delivery"): st.session_state["page"] = "Request Delivery"
+if st.sidebar.button("📍 Live Tracking"): st.session_state["page"] = "Live Tracking"
+if st.sidebar.button("🔔 Notifications"): st.session_state["page"] = "Notifications"
+if st.sidebar.button("📋 Helpdesk"): st.session_state["page"] = "Helpdesk"
+if st.sidebar.button("⭐ Feedback"): st.session_state["page"] = "Feedback"
 
-# Live data calculations derived from database contents
-total_orders_all_time = 284 + len(requests_list)
-active_count = sum(1 for r in requests_list if r["status"] == "Pending" or r["status"] == "In Transit")
+# Baseline calculation arrays mapping metrics counters data feeds
+total_completed_all_time = 284 + len([r for r in requests_list if r["status"] == "Delivered"])
+active_deliveries_count = sum(1 for r in requests_list if r["status"] == "Pending" or r["status"] == "In Transit")
 
-# ── 4. PAGE DISPLAY PANELS ───────────────────────────────────────────────────
+# ── 6. DYNAMIC ROUTING VIEWS CHANNELS ────────────────────────────────────────
 
-# VIEW 1: HOME PAGE
+# PANEL VIEW A: DASHBOARD PORTAL OVERVIEW
 if st.session_state["page"] == "Home":
-    # Built-in high-contrast title card
-    st.title("Meet TURBO 🚚")
-    st.write("Your Autonomous Campus Delivery Companion — faster, smarter, and fully trackable. Zero waiting. Zero hassle. Pure efficiency.")
+    st.markdown(f"""
+    <div class='hero-card'>
+        <h1 style='margin:0; font-size:2.4rem;'>Meet TURBO 🚚</h1>
+        <p style='margin:12px 0; opacity:0.85; font-size:1.05rem; max-width:600px;'>
+            Your Autonomous Campus Delivery Companion — faster, smarter, and fully trackable. Zero waiting. Zero hassle. Pure efficiency.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    # Telemetry Status Container
-    c_status = st.container(border=True)
-    with c_status:
-        st.write(f"**Current Unit Array Status**: {bot_data['status']} | **Power Reserve**: {bot_data['battery']}% | **Completed Log Count**: {total_orders_all_time}")
-        
-    st.markdown("---")
-    
-    # Four-Metric Layout Grid Row
+    # Four-Metric Layout Grid Row Elements Data Displays
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Active Deliveries", active_count if active_count > 0 else "3")
-    m2.metric("Total Completed", total_orders_all_time)
-    m3.metric("Avg Delivery Time", "8 min")
-    m4.metric("TURBO Units", "4")
+    m1.metric(label="Active Deliveries", value=active_deliveries_count if active_deliveries_count > 0 else "0")
+    m2.metric(label="Total Completed", value=total_completed_all_time)
+    m3.metric(label="Avg Delivery Time", value="8 min")
+    m4.metric(label="TURBO Units Array", value="4")
         
-    st.markdown("### 📌 Core Features")
+    st.markdown("<br><h3>📌 Core Features</h3>", unsafe_allow_html=True)
     
-    # Feature Display Blocks Row
+    # Feature Display Blocks Layout Columns Row
     f1, f2, f3, f4 = st.columns(4)
     with f1:
-        with st.container(border=True):
-            st.markdown("**📍 Geo Tracking**\n\nReal-time live map of TURBO's exact position on campus.")
+        st.markdown("<div class='feature-box'><b>📍 Geo Tracking</b><br><span style='font-size:13px; color:#64748b;'>Real-time live map of TURBO's exact position on campus.</span></div>", unsafe_allow_html=True)
     with f2:
-        with st.container(border=True):
-            st.markdown("**🔒 End-to-End Security**\n\nLockable compartment + live camera. Your items, protected.")
+        st.markdown("<div class='feature-box'><b>🔒 End-to-End Security</b><br><span style='font-size:13px; color:#64748b;'>Lockable compartment + live camera. Your items, protected.</span></div>", unsafe_allow_html=True)
     with f3:
-        with st.container(border=True):
-            st.markdown("**🔔 Smart Notifications**\n\nInstant alerts for every delivery milestone automatically.")
+        st.markdown("<div class='feature-box'><b>🔔 Smart Notifications</b><br><span style='font-size:13px; color:#64748b;'>Instant alerts for every delivery milestone automatically.</span></div>", unsafe_allow_html=True)
     with f4:
-        with st.container(border=True):
-            st.markdown("**🛠️ Fleet Maintenance**\n\nHealth dashboard, battery status and issue reporting.")
+        st.markdown("<div class='feature-box'><b>🛠️ Fleet Maintenance</b><br><span style='font-size:13px; color:#64748b;'>Health dashboard, battery status and issue reporting.</span></div>", unsafe_allow_html=True)
 
-# VIEW 2: REQUEST DELIVERY FORM PANEL
+# PANEL VIEW B: FORM LOGISTICS DEPLOYMENT FIELD DOCK
 elif st.session_state["page"] == "Request Delivery":
-    st.title("📦 Log New Last-Mile Delivery")
+    st.markdown("<h2>📦 Log New Last-Mile Delivery</h2>", unsafe_allow_html=True)
     
     with st.form("new_delivery_form", clear_on_submit=True):
-        name = st.text_input("Recipient Name", placeholder="Enter recipient's full name...")
+        name = st.text_input("Recipient Name", placeholder="Type full name...")
         category = st.selectbox("Classification Type", ["Food", "Parcel", "Medical", "Documents"])
         priority = st.radio("Urgency Operational Level", ["Normal", "High", "Critical"], horizontal=True)
         pickup = st.text_input("Origin Hub (Pickup Point)", placeholder="e.g., Central Kitchen")
-        dropoff = st.text_input("Destination Point (Drop-off)", placeholder="e.g., Room 302, Block C")
+        dropoff = st.text_input("Destination Point (Drop-off)", placeholder="e.g., Tech Mahindra Block A")
         
-        submit_btn = st.form_submit_button("Deploy Autonomous Agent")
-        
-        if submit_btn:
+        if st.form_submit_button("Deploy Autonomous Agent"):
             if name and pickup and dropoff:
                 new_id = f"NAV-{random.randint(1030, 1999)}"
                 now_str = datetime.datetime.now().strftime("%I:%M %p")
                 
-                # Commit to shared SQLite database
+                # Write cleanly directly to the SQLite shared engine system files
                 db.add_request(new_id, name, category, pickup, dropoff, priority, "Pending", now_str)
-                st.success(f"🚀 Sent request {new_id} to database queue!")
+                st.success(f"🚀 Sent request **{new_id}** to database queue!")
             else:
-                st.error("⚠️ Incomplete form: Please fill out Name, Pickup, and Dropoff fields.")
+                st.error("⚠️ Incomplete Fields: Please supply variables for Name, Pickup, and Drop-off points.")
 
-# VIEW 3: LIVE TRACKING OVERVIEW
-# VIEW 3: LIVE TRACKING OVERVIEW (With Live Folium Map Tracking!)
+## PANEL VIEW C: MAP AND TELEMETRY REAL-TIME PROGRESS TRACKER (FIXED)
 elif st.session_state["page"] == "Live Tracking":
     import folium
     from streamlit_folium import st_folium
 
-    st.title("📍 Real-Time Location Tracker")
+    st.markdown("<h2>📍 Real-Time Location Tracker</h2>", unsafe_allow_html=True)
     
-    # 🔄 LIVE AUTO-REFRESH CONTAINER (Runs background checks every 3 seconds)
+    # 🔄 LIVE AUTO-REFRESH WRAPPER CONTAINER (Polls DB directly every 3 seconds)
     @st.fragment(run_every=3)
     def render_live_user_tracking():
-        current_bot_data = db.get_bot_telemetry()
+        # Re-fetch telemetry fresh on every loop pass step inside the fragment
+        current_bot = db.get_bot_telemetry()
         delivery_stops = db.get_waypoints()
         
-        if current_bot_data["route_in_progress"] or "Returning" in current_bot_data["status"]:
-            st.success("🚚 TURBO Rover is Driving Live!")
+        if current_bot["route_in_progress"] or "Returning" in current_bot["status"]:
+            st.success("🚚 TURBO Rover is Navigating Campus Live!")
             
-            # Metric Columns Row Layout
             t1, t2 = st.columns(2)
-            t1.metric(label="Current Mission Target Status", value=current_bot_data["status"])
-            t2.metric(label="Rover Battery Reserve 🔋", value=f"{current_bot_data['battery']}%")
+            t1.metric(label="Current Mission Target Status", value=current_bot["status"])
+            t2.metric(label="Rover Battery Reserve 🔋", value=f"{current_bot['battery']}%")
             
-            # --- CUSTOMER TELEMETRY MAP INJECTION ---
             st.markdown("### 🗺️ Live Delivery Journey Tracker")
             
-            # Center the map canvas right on the bot's live location points
-            user_map = folium.Map(
-                location=[current_bot_data["live_lat"], current_bot_data["live_lng"]], 
-                zoom_start=18,
-                max_zoom=21
-            )
-            
-            # 1. Plot the Live Rover Marker Pin
-            folium.Marker(
-                location=[current_bot_data["live_lat"], current_bot_data["live_lng"]],
-                popup=f"TURBO Rover Status: {current_bot_data['status']}",
-                icon=folium.Icon(color="purple", icon="play", prefix="fa")
-            ).add_to(user_map)
-            
-            # 2. Plot the Remaining Destination Flag Waypoints
-            for idx, stop in enumerate(delivery_stops):
-                # Mark past drops as gray, active target as orange, future targets as red
-                flag_color = "gray" if idx < current_bot_data["current_stop_index"] else \
-                             ("orange" if idx == current_bot_data["current_stop_index"] else "red")
+            # SAFE MAP INJECTION: Check if coordinates exist before drawing map elements
+            try:
+                bot_lat = current_bot.get("live_lat", 17.570514)
+                bot_lng = current_bot.get("live_lng", 78.432775)
                 
+                # Check for invalid or missing coordinate data structures
+                if bot_lat is None or bot_lng is None:
+                    bot_lat, bot_lng = 17.570514, 78.432775
+
+                user_map = folium.Map(location=[bot_lat, bot_lng], zoom_start=18)
+                
+                # Place purple tracking marker for the active bot asset
                 folium.Marker(
-                    location=[stop[0], stop[1]],
-                    popup=f"Delivery Waypoint #{idx+1}",
-                    icon=folium.Icon(color=flag_color, icon="flag")
+                    location=[bot_lat, bot_lng],
+                    popup=f"Status: {current_bot['status']}",
+                    icon=folium.Icon(color="purple", icon="play", prefix="fa")
                 ).add_to(user_map)
                 
-            # 3. Render the dynamic path line connection tracing
-            if delivery_stops:
-                path_lines = [[current_bot_data["live_lat"], current_bot_data["live_lng"]]] + [[s[0], s[1]] for s in delivery_stops]
-                folium.PolyLine(locations=path_lines, color="#4589f5", weight=4, dash_array="6, 6").add_to(user_map)
+                # Map out flag stops targeting mapped waypoints coordinate pins
+                if delivery_stops:
+                    for idx, stop in enumerate(delivery_stops):
+                        # Add a safety check to ensure individual stops have valid elements
+                        if isinstance(stop, (list, tuple)) and len(stop) >= 2:
+                            flag_color = "gray" if idx < current_bot["current_stop_index"] else \
+                                         ("orange" if idx == current_bot["current_stop_index"] else "red")
+                            folium.Marker(location=[stop[0], stop[1]], icon=folium.Icon(color=flag_color, icon="flag")).add_to(user_map)
+                    
+                    # Wire structural linear connection traces along the route map values path
+                    path_lines = [[bot_lat, bot_lng]] + [[s[0], s[1]] for s in delivery_stops if isinstance(s, (list, tuple)) and len(s) >= 2]
+                    folium.PolyLine(locations=path_lines, color="#4589f5", weight=4, dash_array="6, 6").add_to(user_map)
+                    
+                st_folium(user_map, height=440, width="100%", key="user_live_delivery_tracking_map")
+                st.info(f"🛰️ Coordinate Stream: Latitude `{bot_lat:.6f}` | Longitude `{bot_lng:.6f}`")
                 
-            # Draw interactive map container window onto client side layout frame
-            st_folium(user_map, height=440, width="100%", key="user_live_delivery_tracking_map")
-            
-            st.info(f"🛰️ Telemetry Node Coordinates: Lat `{current_bot_data['live_lat']:.6f}` | Lng `{current_bot_data['live_lng']:.6f}`")
+            except Exception as e:
+                st.warning("🔄 Syncing map telemetry stream...")
         else:
             st.info("System Idle. Once the admin dispatches a route path, live telemetry updates will stream here.")
 
-    # Fire background data query loop container function
+    # Execute polling data fragment
     render_live_user_tracking()
