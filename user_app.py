@@ -21,94 +21,102 @@ SUCCESS = "#22c55e"
 WARNING = "#f59e0b"
 DANGER  = "#ef4444"
 
-# ── 3. CLEAN GLOBAL UI STYLE RULES (FORCED MIDNIGHT THEME) ───────────────────
+# ── 3. CLEAN GLOBAL UI STYLE RULES (REVERTED TO ORIGINAL PALETTE) ───────────
 st.markdown(f"""
 <style>
-/* App Body Background - Deep Midnight Sky */
+/* App Body Background - Restored to original clean light gradient */
 [data-testid="stAppViewContainer"] {{ 
-    background: linear-gradient(180deg, #0b132b 0%, #1c2541 100%) !important; 
-    color: #ffffff !important;
+    background: linear-gradient(180deg, #eef4ff 0%, #f8fbff 100%) !important; 
+    color: #0a2540 !important;
 }}
 
-/* Clear any default layout overrides */
+/* Clear block padding overrides safely */
 [data-testid="block-container"] {{
     background-color: transparent !important;
-    padding-top: 2rem !important;
+    padding-top: 1.4rem !important;
+    padding-bottom: 2.5rem !important;
 }}
 
-/* Sidebar Design Elements - Deep Sleek Blue */
+/* Sidebar Design Elements - Deep Sleek Blue preserved */
 [data-testid="stSidebar"] {{ 
-    background: linear-gradient(180deg, #0b132b 0%, {NAVY} 100%) !important; 
-    border-right: 1px solid #3a506b !important;
+    background: linear-gradient(180deg, #071a30 0%, {NAVY} 100%) !important; 
+    border-right: none !important;
 }}
 [data-testid="stSidebar"] .stButton > button {{
-    width:100%; background:transparent; border:none; text-align:left;
-    padding:12px 18px; border-radius:10px; color:#e2e8f0 !important;
-    font-size:14px; font-weight: 600; transition:all .2s; margin-bottom:4px;
+    width: 100%; background: transparent; border: none; text-align: left;
+    padding: 10px 16px; border-radius: 10px; color: #e2e8f0 !important;
+    font-size: 14px; transition: all .2s; margin-bottom: 2px;
 }}
 [data-testid="stSidebar"] .stButton > button:hover {{
-    background:rgba(69,137,245,0.2) !important;
-    color:white !important;
-}}
-
-/* Structured Main Content Box (Wraps your form nicely) */
-div[data-testid="stForm"] {{
-    background-color: #1c2541 !important;
-    border: 1px solid #3a506b !important;
-    border-radius: 20px !important;
-    padding: 2.5rem !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
-}}
-
-/* Header and Section Typography */
-h1, h2, h3, span, li {{ 
-    color: #ffffff !important; 
-    font-weight: 700 !important;
-    letter-spacing: -0.5px;
-}}
-
-/* Widget Labels (Form text above inputs) */
-[data-testid="stWidgetLabel"], [data-testid="stRadio"] label p {{
-    color: #cbd5e1 !important;
-    font-weight: 600 !important;
-    font-size: 14px !important;
-    margin-bottom: 6px !important;
-}}
-
-/* Sleek Dark Input Fields - High Contrast Visibility */
-.stTextInput input, .stSelectbox div[data-baseweb="select"], .stTextArea textarea {{
-    background-color: #0b132b !important;
-    color: #ffffff !important;
-    border: 2px solid #3a506b !important;
-    border-radius: 12px !important;
-    font-weight: 500 !important;
-    padding: 10px 14px !important;
-}}
-
-/* Input Box Highlight Effect on Selection */
-.stTextInput input:focus, .stTextArea textarea:focus {{
-    border-color: {BLUE} !important;
-    box-shadow: 0 0 0 2px rgba(69, 137, 245, 0.3) !important;
-}}
-
-/* Form Button Alignment Styling */
-.stButton > button {{
-    background: linear-gradient(135deg, {BLUE}, {TEAL}) !important;
+    background: rgba(69, 137, 245, 0.25) !important;
     color: white !important;
-    border: none !important;
-    border-radius: 12px !important;
-    font-weight: 700 !important;
-    padding: 0.6rem 2rem !important;
-    letter-spacing: 0.5px;
-    box-shadow: 0 4px 14px rgba(69, 137, 245, 0.3) !important;
-    transition: all 0.2s ease !important;
-}}
-.stButton > button:hover {{
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 20px rgba(69, 137, 245, 0.5) !important;
 }}
 
-/* 🗺️ MAP PROTECTION RULES: Keeps map tiles crisp and colored */
+/* Standardized Content Form Wrapping Card */
+div[data-testid="stForm"] {{
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 18px !important;
+    padding: 22px 20px !important;
+    box-shadow: 0 4px 20px rgba(10,37,64,.09) !important;
+}}
+
+/* Custom Styling Feature Content Boxes */
+.feature-box {{
+    background: white !important; 
+    border-radius: 16px; 
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(10,37,64,.06) !important; 
+    height: 100%;
+    border-top: 4px solid {BLUE} !important;
+    color: #1e293b !important;
+}}
+.feature-box b {{
+    color: #0a2540 !important;
+}}
+
+/* Hero Header Card Container - High Contrast Restored */
+.hero-card {{ 
+    background: linear-gradient(135deg, #071a30 0%, #0f3460 50%, #1a5276 100%) !important; 
+    border-radius: 24px; padding: 36px 32px; color: white !important; margin-bottom: 28px; 
+    box-shadow: 0 8px 32px rgba(10,37,64,.25) !important;
+    position: relative; overflow: hidden;
+}}
+.hero-card h1, .hero-card p {{ color: white !important; }}
+
+/* Metric Typography Elements - Dark Navy text over clean white fields */
+[data-testid="stMetricLabel"] {{ 
+    color: #475569 !important; 
+    font-weight: 700 !important; 
+    font-size: 15px !important; 
+}}
+[data-testid="stMetricValue"] {{ 
+    color: {NAVY} !important; 
+    font-weight: 800 !important; 
+}}
+
+/* Core Main Structural Section Headings */
+h1, h2, h3 {{ 
+    color: {NAVY} !important; 
+    font-weight: 700 !important; 
+}}
+
+/* Sleek Light Input Fields - Clean High Contrast Visible Text */
+.stTextInput input, .stSelectbox div[data-baseweb="select"], .stTextArea textarea {{
+    background-color: #ffffff !important;
+    color: #0a2540 !important;
+    border: 2px solid #cbd5e1 !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+}}
+
+/* Form Input Element Label Tags Visibility Fix */
+[data-testid="stWidgetLabel"], [data-testid="stRadio"] label p {{
+    color: #0a2540 !important;
+    font-weight: 600 !important;
+}}
+
+/* 🗺️ MAP PROTECTION RULES: Keeps map tiles crisp and perfectly colored */
 h1, h2, h3, p, span, label, li:not(.folium-map *) {{
     color: inherit;
 }}
@@ -119,7 +127,6 @@ h1, h2, h3, p, span, label, li:not(.folium-map *) {{
 }}
 </style>
 """, unsafe_allow_html=True)
-
 
 # ── 4. NAVIGATION STATE CONTROL ──────────────────────────────────────────────
 if "page" not in st.session_state:
